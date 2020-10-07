@@ -1,6 +1,6 @@
 #!/bin/bash
-PATH_NAME="/home/ubuntu/omnetpp-5.4.1/samples/spider_omnet/benchmarks/circulations/"
-GRAPH_PATH="/home/ubuntu/omnetpp-5.4.1/samples/spider_omnet/scripts/figures/"
+PATH_NAME="$HOME/omnetpp-5.6.2/samples/spider_omnet/benchmarks/circulations/"
+GRAPH_PATH="$HOME/omnetpp-5.6.2/samples/spider_omnet/scripts/figures/"
 
 num_nodes=("2" "2" "3" "4" "5" "5" "5" "0" "0" "10" "20" "50" "60" "80" "100" "200" "400" "600" "800" "1000" \
     "10" "20" "50" "60" "80" "100" "200" "400" "600" "800" "1000" "40" "10" "20" "30" "40" "0" "0" "0" "4")
@@ -59,12 +59,12 @@ cp hostNodePropFairPriceScheme.ned ${PATH_NAME}
 cp routerNodeDCTCPBal.ned ${PATH_NAME}
 
 arraylength=${#prefix[@]}
-PYTHON="/usr/bin/python"
+PYTHON=$(which python)
 mkdir -p ${PATH_NAME}
 
 # TODO: find the indices in prefix of the topologies you want to run on and then specify them in array
 # adjust experiment time as needed
-array=(20) 
+array=( 22 ) 
 for i in "${array[@]}" 
 do
     for balance in 100 200 400 # 50 100 200 400      

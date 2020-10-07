@@ -9,7 +9,7 @@ workload_prefix="sw_50_routers"
 routing_scheme="DCTCPQ"
 num_start=0
 num_end=4
-balance_list=("100" "200" "400" "800" "1600") 
+balance_list=("100" "200" "400" "800" "1600")
 path_choice="widest"
 scheduling_alg="LIFO"
 num_paths=4
@@ -17,6 +17,7 @@ exp_type="circ"
 demand_scale="3"
 dag_percent_list=("20" "45" "65")
 rebalancing_rate_list=("10" "100" "1000" "10000" "100000")
+analyze_only=false
 
 # help message
 function usage {
@@ -35,6 +36,7 @@ function usage {
     echo -e "\t--path-choice=$path_choice"
     echo -e "\t--num-paths=$num_paths"
     echo -e "\t--scheduling-alg=$scheduling_alg"
+    echo -e "\t[--analyze-only]"
     echo -e ""
 }
 
@@ -85,6 +87,12 @@ while [ "$1" != "" ]; do
         --scheduling-alg)
             scheduling_alg=$VALUE
             ;;
+        --demand-scale)
+            demand_scale=$VALUE
+            ;;
+        --analyze-only)
+            analyze_only=true
+            ;;
         *)
             echo "ERROR: unknown parameter \"$PARAM\""
             usage
@@ -101,11 +109,11 @@ do
     for balance in $balance_list
     do
     # generate the graph first to ned file
-    echo $prefix
-    echo $balance
-    echo $num
+    echo "prefix: $prefix"
+    echo "balance: $balance"
+    echo "num: $num"
 
-    if [[ "$exp_type" == "rebalance"]]
+    if [[ "$exp_type" == "rebalance" ]]
     then
         for dag_amt in $dag_percent_list
         do
@@ -119,11 +127,12 @@ do
                 inifile="${DAG_PATH_NAME}${workloadname}_default.ini"
                 network="${prefix}_dag${dag_amt}_net"
                 topofile="${DAG_PATH_NAME}${prefix}_topo${balance}_rb.txt"
-        
-                # run this one circulation experiment
-                run_single_rebalancing_experiment $prefix $balance $num $routing_scheme \
-                    $path_choice $num_paths $scheduling_alg $demand_scale $dag_amt $rate
 
+		if [ ${analyze_only} == "false" ]; then
+                    # run this one circulation experiment
+                    run_single_rebalancing_experiment $prefix $balance $num $routing_scheme \
+						      $path_choice $num_paths $scheduling_alg $demand_scale $dag_amt $rate
+		fi
                 # plot results
                 process_single_rebalancing_experiment_results $prefix $balance $num $routing_scheme \
                     $path_choice $num_paths $scheduling_alg $demand_scale $dag_amt $rate
@@ -142,11 +151,12 @@ do
             inifile="${DAG_PATH_NAME}${workloadname}_default.ini"
             network="${prefix}_dag${dag_amt}_net"
             topofile="${DAG_PATH_NAME}${prefix}_topo${balance}.txt"
-    
-            # run this one circulation experiment
-            run_single_dag_experiment $prefix $balance $num $routing_scheme \
-                $path_choice $num_paths $scheduling_alg $demand_scale $dag_amt $exp_type
 
+	    if [ ${analyze_only} == "false" ]; then
+		# run this one circulation experiment
+		run_single_dag_experiment $prefix $balance $num $routing_scheme \
+					  $path_choice $num_paths $scheduling_alg $demand_scale $dag_amt $exp_type
+	    fi
             # plot results
             process_single_dag_experiment_results $prefix $balance $num $routing_scheme \
                 $path_choice $num_paths $scheduling_alg $demand_scale $dag_amt
@@ -158,11 +168,12 @@ do
         inifile="${CIRC_PATH_NAME}${workloadname}_default.ini"
         network="${prefix}_circ_net"
         topofile="${CIRC_PATH_NAME}${prefix}_topo${balance}.txt"
-        
-        # run this one circulation experiment
-        run_single_circ_experiment $prefix $balance $num $routing_scheme \
-            $path_choice $num_paths $scheduling_alg $demand_scale $exp_type
 
+	if [ ${analyze_only} == "false" ]; then
+            # run this one circulation experiment
+            run_single_circ_experiment $prefix $balance $num $routing_scheme \
+				       $path_choice $num_paths $scheduling_alg $demand_scale $exp_type
+	fi
         # plot results
         process_single_circ_experiment_results $prefix $balance $num $routing_scheme \
             $path_choice $num_paths $scheduling_alg $demand_scale

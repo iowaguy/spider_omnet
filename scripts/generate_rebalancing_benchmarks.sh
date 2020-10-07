@@ -1,6 +1,6 @@
 #!/bin/bash
-PATH_PREFIX="/home/ubuntu/omnetpp-5.4.1/samples/spider_omnet/benchmarks/"
-GRAPH_PATH="/home/ubuntu/omnetpp-5.4.1/samples/spider_omnet/scripts/figures/"
+PATH_PREFIX="$HOME/omnetpp-5.4.1/samples/spider_omnet/benchmarks/"
+GRAPH_PATH="$HOME/omnetpp-5.4.1/samples/spider_omnet/scripts/figures/"
 
 num_nodes=("3" "3" "4" "5" "5" "5" "0" "0" "10" "20" "50" "50" "60" "80" "30" "40" "0" "0" "50" "50")
 

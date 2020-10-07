@@ -4,6 +4,7 @@ source setup.sh
 
 # plot results given vector, scalar file inputs and output graph prefix
 function plot {
+    echo "BENW: sca_file_path: ${sca_file_path}" > ~/debug.txt
     python ${DEFAULT_PATH}/scripts/generate_analysis_plots_for_single_run.py \
       --detail $signalsEnabled \
       --vec_file $1 \
@@ -34,14 +35,14 @@ function process_single_circ_experiment_results {
     network="${prefix}_circ_net"
     config_name=${network}_${balance}_${routing_scheme}
     config_name=${config_name}_circ${num}_demand${demand_scale}_${path_choice}
-    config_name=${config_name}_${num_paths}_${scheduling_alg} 
+    config_name=${config_name}_${num_paths}_${scheduling_alg}
 
-    vec_file_path=${PATH_NAME}results/${config_name}-#0.vec
-    sca_file_path=${PATH_NAME}results/${config_name}-#0.sca
+    vec_file_path=${CIRC_PATH_NAME}results/${config_name}-#0.vec
+    sca_file_path=${CIRC_PATH_NAME}results/${config_name}-#0.sca
     graph_op_prefix=${GRAPH_PATH}/${prefix}${balance}_circ${num}_delay${delay}_demand${demand_scale}0
     graph_name=${graph_op_prefix}${routing_scheme}_${path_choice}_${num_paths}_${scheduling_alg}
-    
-    plot $vec_file_path $sca_file_path $graph_name        
+
+    plot $vec_file_path $sca_file_path $graph_name
 }
 
 # find vector/scalar files for a dag experiment
@@ -60,7 +61,7 @@ function process_single_dag_experiment_results {
     network="${prefix}_dag${dag_amt}_net"
     config_name=${network}_${balance}_${routing_scheme}
     config_name=${config_name}_dag${num}_demand${demand_scale}_${path_choice}
-    config_name=${config_name}_${num_paths}_${scheduling_alg} 
+    config_name=${config_name}_${num_paths}_${scheduling_alg}
 
     vec_file_path=${DAG_PATH_NAME}results/${config_name}-#0.vec
     sca_file_path=${DAG_PATH_NAME}results/${config_name}-#0.sca
@@ -87,7 +88,7 @@ function process_single_rebalancing_experiment_results {
     network="${prefix}_dag${dag_amt}_net"
     config_name=${network}_${balance}_${routing_scheme}
     config_name=${config_name}_dag${num}_demand${demand_scale}_${path_choice}
-    config_name=${config_name}_${num_paths}_${scheduling_alg} 
+    config_name=${config_name}_${num_paths}_${scheduling_alg}
     config_name=${config_name}_rebalancing${rebalancing_rate}
 
     vec_file_path=${DAG_PATH_NAME}results/${config_name}-#0.vec

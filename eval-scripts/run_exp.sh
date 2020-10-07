@@ -7,16 +7,48 @@ num_nodes=("2" "2" "3" "4" "5" "5" "5" "0" "0" "10" "20" "50" "60" "80" "100" "2
 
 #balance=100
 
-prefix=("two_node_imbalance" "two_node_capacity" "three_node" "four_node" "five_node_hardcoded" \
-    "hotnets" "five_line" "lnd_dec4_2018" "lnd_dec4_2018lessScale" \
-    "sw_10_routers" "sw_20_routers" "sw_50_routers" "sw_60_routers" "sw_80_routers"  \
-    "sw_100_routers" "sw_200_routers" "sw_400_routers" "sw_600_routers" \
-    "sw_800_routers" "sw_1000_routers"\
-    "sf_10_routers" "sf_20_routers" \
-    "sf_50_routers" "sf_60_routers" "sf_80_routers"  \
-    "sf_100_routers" "sf_200_routers" "sf_400_routers" "sf_600_routers" \
-    "sf_800_routers" "sf_1000_routers" "tree_40_routers" "random_10_routers" "random_20_routers"\
-    "random_30_routers" "sw_sparse_40_routers" "lnd_gaussian" "lnd_uniform" "toy_dctcp" "parallel_graph")
+prefix=(
+  "two_node_imbalance"     #0
+  "two_node_capacity"      #1
+  "three_node"             #2
+  "four_node"              #3
+  "five_node_hardcoded"    #4
+  "hotnets"                #5
+  "five_line"              #6
+  "lnd_dec4_2018"          #7
+  "lnd_dec4_2018lessScale" #8
+  "sw_10_routers"          #9
+  "sw_20_routers"          #10
+  "sw_50_routers"          #11
+  "sw_60_routers"          #12
+  "sw_80_routers"          #13
+  "sw_100_routers"         #14
+  "sw_200_routers"         #15
+  "sw_400_routers"         #16
+  "sw_600_routers"         #17
+  "sw_800_routers"         #18
+  "sw_1000_routers"        #19
+  "sf_10_routers"          #20
+  "sf_20_routers"          #21
+  "sf_50_routers"          #22
+  "sf_60_routers"          #23
+  "sf_80_routers"          #24
+  "sf_100_routers"         #25
+  "sf_200_routers"         #26
+  "sf_400_routers"         #27
+  "sf_600_routers"         #28
+  "sf_800_routers"         #29
+  "sf_1000_routers"        #30
+  "tree_40_routers"        #31
+  "random_10_routers"      #32
+  "random_20_routers"      #33
+  "random_30_routers"      #34
+  "sw_sparse_40_routers"   #35
+  "lnd_gaussian"           #36
+  "lnd_uniform"            #37
+  "toy_dctcp"              #38
+  "parallel_graph"         #39
+)
 
 
 demand_scale=("10") # "60" "90")
@@ -76,7 +108,7 @@ cp hostNodePropFairPriceScheme.ned ${PATH_NAME}
 
 
 arraylength=${#prefix[@]}
-PYTHON="python"
+PYTHON="$(which python)"
 mkdir -p ${PATH_NAME}
 
 if [ -z "$pathChoice" ]; then
@@ -96,10 +128,10 @@ echo "${#num_nodes[@]}"
 # TODO: find the indices in prefix of the topologies you want to run on and then specify them in array
 # adjust experiment time as needed
 #array=( 0 1 4 5 8 19 32)
-array=( 0 1) #10 11 13 22 24)
+array=( 22 ) #10 11 13 22 24)
 for i in "${array[@]}"
 do
-    for balance in 100 #200 300 600 900 #2000 9000 
+    for balance in 100 #200 300 600 900 #2000 9000
     do
         echo ${prefix[i]}
         network="${prefix[i]}_circ_net"
@@ -125,14 +157,14 @@ do
         else
             graph_type="simple_topologies"
         fi
-        
+
         # set delay amount
         if [[ (${prefix[i]:0:3} == "two") || (${prefix[i]:0:5} == "three") ]]; then
             delay="120"
         else
             delay="30"
         fi
-        
+
         # STEP 1: create topology
         $PYTHON scripts/create_topo_ned_file.py $graph_type\
                 --network-name ${PATH_NAME}$network\
@@ -142,7 +174,7 @@ do
                 --separate-end-hosts \
                 --delay-per-channel $delay\
                 --randomize-start-bal $random_init_bal\
-                --random-channel-capacity $random_capacity 
+                --random-channel-capacity $random_capacity
 
 
         # create workload files and run different demand levels
@@ -154,7 +186,7 @@ do
             workload="${PATH_NAME}$workloadname"
             inifile="${PATH_NAME}${workloadname}_default.ini"
             payment_graph_topo="custom"
-            
+
             # figure out payment graph/workload topology
             if [ ${prefix[i]:0:9} == "five_line" ]; then
                 payment_graph_topo="simple_line"
@@ -185,11 +217,11 @@ do
                     --generate-json-also \
                     --timeout-value 5 \
                     --scale-amount $scale \
-                    --run-num 0 
+                    --run-num 0
 
             # STEP 3: run the experiment
             # routing schemes where number of path choices doesn't matter
-            if [ ${routing_scheme} ==  "shortestPath" ]; then 
+            if [ "${routing_scheme}" ==  "shortestPath" ]; then
               output_file=outputs/${prefix[i]}_${balance}_circ_${routing_scheme}_demand${scale}0_${pathChoice}
               inifile=${PATH_NAME}${prefix[i]}_${balance}_circ_${routing_scheme}_demand${scale}_${pathChoice}.ini
 
@@ -214,9 +246,9 @@ do
 
 
               # run the omnetexecutable with the right parameters
-              ./spiderNet -u Cmdenv -f $inifile -c ${network}_${balance}_${routing_scheme}_demand${scale}_${pathChoice} -n ${PATH_NAME}\
-                    > ${output_file}.txt & 
-            
+              ./spiderNet -u Cmdenv -f $inifile -c ${network}_${balance}_${routing_scheme}_demand${scale}_${pathChoice}_${schedulingAlgorithm} -n ${PATH_NAME}\
+                    > ${output_file}.txt &
+
           else
               pids=""
               # if you add more choices for the number of paths you might run out of cores/memory
@@ -228,7 +260,7 @@ do
 
                 if [[ $routing_scheme =~ .*Window.* ]]; then
                     windowEnabled=true
-                else 
+                else
                     windowEnabled=false
                 fi
 
@@ -290,18 +322,18 @@ do
             # STEP 4: plot everything for this demand
             # TODO: add plotting script
             echo "Plotting"
-            payment_graph_type='circ' 
+            payment_graph_type='circ'
             if [ "$timeoutEnabled" = true ] ; then timeout=""; else timeout="no_timeouts"; fi
             if [ "$random_init_bal" = true ] ; then suffix="randomInitBal_"; else suffix=""; fi
             if [ "$random_capacity" = true ]; then suffix="${suffix}randomCapacity_"; fi
             echo $suffix
             graph_op_prefix=${GRAPH_PATH}${timeout}/${prefix[i]}${balance}_delay${delay}_demand${scale}0_${suffix}
             vec_file_prefix=${PATH_NAME}results/${prefix[i]}_${payment_graph_type}_net_${balance}_
-            
+
             #routing schemes where number of path choices doesn't matter
-            if [ ${routing_scheme} ==  "shortestPath" ]; then 
-                vec_file_path=${vec_file_prefix}${routing_scheme}_demand${scale}_${pathChoice}-#0.vec
-                sca_file_path=${vec_file_prefix}${routing_scheme}_demand${scale}_${pathChoice}-#0.sca
+            if [ "${routing_scheme}" ==  "shortestPath" ]; then
+                vec_file_path=${vec_file_prefix}${routing_scheme}_demand${scale}_${pathChoice}_${schedulingAlgorithm}-#0.vec
+                sca_file_path=${vec_file_prefix}${routing_scheme}_demand${scale}_${pathChoice}_${schedulingAlgorithm}-#0.sca
 
 
                 python scripts/generate_analysis_plots_for_single_run.py \
@@ -313,7 +345,7 @@ do
                   --queue_info --timeouts --frac_completed \
                   --inflight --timeouts_sender \
                   --waiting --bottlenecks --time_inflight
-            
+
 
             #routing schemes where number of path choices matter
             else
@@ -340,7 +372,7 @@ do
                   done
               fi
 
-            # STEP 5: cleanup        
+            # STEP 5: cleanup
             #rm ${PATH_NAME}${prefix[i]}_circ*_demand${scale}.ini
             #rm ${workload}_workload.txt
             #rm ${workload}.json

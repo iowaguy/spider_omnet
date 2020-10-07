@@ -1,3 +1,6 @@
+#import sys
+#sys.path.append('result_parsers/')
+
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -5,8 +8,10 @@ import argparse
 import os
 import json
 import numpy as np
-from parse_vec_files import *
-from parse_sca_files import *
+#from result_parsers import parse_vec_files
+#from result_parsers import parse_sca_files
+import result_parsers.parse_sca_files
+import result_parsers.parse_vec_files
 from matplotlib.backends.backend_pdf import PdfPages
 from cycler import cycler
 from config import *
@@ -497,7 +502,7 @@ def plot_per_payment_channel_stats(args, text_to_add):
     data_to_plot = dict()
 
     with PdfPages(args.save + "_per_channel_info.pdf") as pdf:
-        all_timeseries, vec_id_to_info_map, parameters = parse_vec_file(args.vec_file, "per_channel_plot")
+        all_timeseries, vec_id_to_info_map, parameters = result_parsers.parse_vec_files.parse_vec_file(args.vec_file, "per_channel_plot")
         firstPage = plt.figure()
         firstPage.clf()
         txt = 'Parameters:\n' + parameters
@@ -614,7 +619,7 @@ def plot_per_src_dest_stats(args, text_to_add):
     data_to_plot = dict()
 
     with PdfPages(args.save + "_per_src_dest_stats.pdf") as pdf:
-        all_timeseries, vec_id_to_info_map, parameters = parse_vec_file(args.vec_file, "per_src_dest_plot")
+        all_timeseries, vec_id_to_info_map, parameters = result_parsers.parse_vec_files.parse_vec_file(args.vec_file, "per_src_dest_plot")
  
         firstPage = plt.figure()
         firstPage.clf()
@@ -735,7 +740,7 @@ def plot_per_channel_dest_stats(args, text_to_add):
     data_to_plot = dict()
 
     with PdfPages(args.save + "_per_channel_dest_stats.pdf") as pdf:
-        all_timeseries, vec_id_to_info_map, parameters = parse_vec_file(args.vec_file, "per_channel_dest_plot")
+        all_timeseries, vec_id_to_info_map, parameters = result_parsers.parse_vec_files.parse_vec_file(args.vec_file, "per_channel_dest_plot")
  
         firstPage = plt.figure()
         firstPage.clf()
@@ -765,13 +770,13 @@ def main():
     plt.rc('xtick', labelsize=32)    # fontsize of the tick labels
     plt.rc('ytick', labelsize=32)    # fontsize of the tick labels
     plt.rc('legend', fontsize=34)    # legend fontsize'''
-    summary_stats = parse_sca_files_overall(args.sca_file) 
+    summary_stats = result_parsers.parse_sca_files.parse_sca_files_overall(args.sca_file) 
     f = open(args.save + "_summary.txt", "w+")
     f.write(summary_stats[2])
     f.close()
 
     if args.detail == 'true':
-        text_to_add = parse_sca_files(args.sca_file)
+        text_to_add = result_parsers.parse_sca_files.parse_sca_files(args.sca_file)
         plot_per_payment_channel_stats(args, text_to_add)
         plot_per_src_dest_stats(args, text_to_add)
         plot_per_channel_dest_stats(args, text_to_add)
